@@ -67,7 +67,179 @@ select track.name from track
 where track_id in (select track_id from playlist_track where playlist_id = 5)
 
 --4
-
+select * from track 
+where genre_id in(select genre_id from genre where name = 'Comedy')
 
 --5
+select * from track 
+where album_id in(select album_id from album where name = 'Fireball') 
+
+
 --6
+select * from track
+where album_id 
+in(select album_id from album where artist_id in
+   (select artist_id from artist where name = 'Queen')
+   )
+
+
+
+--UPDATING ROWS
+--1
+update customer
+set fax = null
+where fax IS NOT NULL
+
+--2
+update customer
+set company = 'Self'
+where company is null
+
+
+--3
+update customer
+set last_name = 'Thompson'
+where first_name = 'Julia' AND last_name = 'Barnett'
+
+
+--4
+update customer 
+set support_rep_id = 4
+where email = 'luisrojas@yahoo.cl'
+
+--5
+update track
+set composer = 'The darkness around us'
+where genre_id = 3 AND composer IS NULL
+
+
+
+-- GROUP BY
+--1
+select g.name, COUNT(*) from track
+JOIN genre g on g.genre_id = track.genre_id
+GROUP BY track.genre_id, g.name
+
+--2
+select g.name, COUNT(*) from track
+JOIN genre g on g.genre_id = track.genre_id
+WHERE g.name = 'Pop' OR g.name = 'Rock'
+GROUP BY track.genre_id, g.name
+
+
+--3
+select art.name, count(*) from artist art
+JOIN album al on al.artist_id = art.artist_id
+GROUP BY art.name
+
+
+--USE DISTINCT
+--1
+select distinct composer from track
+
+--2
+select distinct billing_postal_code from invoice
+
+--3
+select distinct company from customer
+
+
+
+--DELETE ROWS
+
+--1
+--N/A
+
+--2
+DELETE FROM practice_delete
+where type = 'bronze';
+
+--3
+DELETE FROM practice_delete
+where type = 'silver';
+
+--4
+DELETE FROM practice_delete
+where value = 150;
+
+
+
+--eCOMMERCE simulation NO HINTS
+create table users (
+  userid serial primary key,
+  name varchar(255),
+  email varchar(255)
+  )
+  
+ create table products(
+   product_id serial primary key,
+   name varchar(255),
+   price money
+   )
+   
+ create table orders (
+   order_id serial primary key,
+   product_id integer references products(product_id),
+   quantity integer
+   )
+   
+ insert into users (name, email)
+ values
+ ('chad', 'chad@mail.com'),
+ ('Ben', 'Ben@mail.com'),
+ ('marco', 'marco@mail.com'),
+ ('Polo', 'Polo@mail.com')
+ 
+ select * from users
+ 
+ insert into products (name, price)
+ values
+ ('Bag of potatoes', 2.99),
+ ('Ribeye Steak', 8.99),
+ ('Salmon', 6.99),
+ ('Hot Dogs', 4.99)
+ 
+ insert into orders (product_id, quantity)
+ values
+ (1, 3),
+  (1, 2),
+  (2, 8),
+  (3, 1),
+  (4, 5)
+  
+  select * from products
+  where product_id in(select product_id from orders where order_id = 1)
+  
+  select * from orders
+  
+  select SUM(p.price * o.quantity) from orders o
+  JOIN products p on p.product_id = o.product_id
+  WHERE order_id = 3;
+  
+  
+  alter table orders
+  add userid integer references users(userid)
+  
+  select * from orders
+  
+  update orders
+  set userid = 2
+  where order_id = 5;
+  
+  select * from orders
+  where userid = 4;
+  
+  select u.name, count(*) from orders o
+  JOIN users u on u.userid = o.userid
+  GROUP BY u.name
+  
+
+
+  --BLACK DIAMOND
+  select u.name, SUM(p.price * o.quantity) from orders o
+  JOIN products p on p.product_id = o.product_id
+  JOIN users u on u.userid = o.userid
+  GROUP BY u.name
+
+
+
